@@ -143,7 +143,7 @@ class _WebViewExampleState extends State<WebViewExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Monthong APP'),
+        title: const Text('Monthong'),
         // This drop down menu demonstrates that Flutter widgets can be shown over the web view.
         actions: <Widget>[
           NavigationControls(_controller.future),
@@ -182,7 +182,7 @@ class _WebViewExampleState extends State<WebViewExample> {
           gestureNavigationEnabled: true,
         );
       }),
-      floatingActionButton: favoriteButton(),
+      floatingActionButton: qrCodeButton(),
     );
   }
 
@@ -197,29 +197,32 @@ class _WebViewExampleState extends State<WebViewExample> {
         });
   }
 
-  Widget favoriteButton() {
+  Widget qrCodeButton() {
     return FutureBuilder<WebViewController>(
         future: _controller.future,
         builder: (BuildContext context,
             AsyncSnapshot<WebViewController> controller) {
           if (controller.hasData) {
-            return FloatingActionButton(
-              onPressed: () async {
-                // ignore: deprecated_member_use
-                Scaffold.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('CLICKED QRCODE BUTTON'),
-                      duration: Duration(milliseconds: 500)),
-                );
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => QRScanPage()));
-                // final String url = (await controller.data!.currentUrl())!;
-                // // ignore: deprecated_member_use
-                // Scaffold.of(context).showSnackBar(
-                //   SnackBar(content: Text('Favorited $url')),
-                // );
-              },
-              child: const Icon(Icons.qr_code_2),
+            return Padding(
+              padding: const EdgeInsets.only(right: 10, bottom: 20),
+              child: FloatingActionButton(
+                onPressed: () async {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => QRScanPage()));
+                  // // ignore: deprecated_member_use
+                  // Scaffold.of(context).showSnackBar(
+                  //   SnackBar(
+                  //       content: Text('CLICKED QRCODE BUTTON'),
+                  //       duration: Duration(milliseconds: 500)),
+                  // );
+                  // final String url = (await controller.data!.currentUrl())!;
+                  // // ignore: deprecated_member_use
+                  // Scaffold.of(context).showSnackBar(
+                  //   SnackBar(content: Text('Favorited $url')),
+                  // );
+                },
+                child: const Icon(Icons.qr_code_2),
+              ),
             );
           }
           return Container();
