@@ -1,13 +1,113 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
-
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-void main() => runApp(MaterialApp(home: WebViewExample()));
+void main() => runApp(MaterialApp(title: 'Demo App', home: WebViewExample()));
+
+class QRScanPage extends StatefulWidget {
+  const QRScanPage({Key? key}) : super(key: key);
+
+  @override
+  _QRScanPageState createState() => _QRScanPageState();
+}
+
+class _QRScanPageState extends State<QRScanPage> {
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  Barcode? result;
+  QRViewController? controller;
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  // In order to get hot reload to work we need to pause the camera if the platform
+  // is android, or resume the camera if the platform is iOS.
+  @override
+  void reassemble() async {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      await controller!.pauseCamera();
+    }
+    controller!.resumeCamera();
+  }
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+          child: Scaffold(
+        body: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            _buildQrView(context),
+            Positioned(
+              top: 10,
+              child: FutureBuilder<bool?>(
+                  future: controller?.getFlashStatus(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data != null) {
+                      return IconButton(
+                          tooltip: 'toggle flashlight',
+                          onPressed: () async {
+                            await controller?.toggleFlash();
+                            setState(() {});
+                          },
+                          icon: Icon(
+                            snapshot.data! ? Icons.flash_on : Icons.flash_off,
+                            color: Colors.white,
+                          ));
+                    }
+                    return Container();
+                  }),
+            ),
+            Positioned(
+                bottom: 10,
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: Colors.white24),
+                  child: Text(
+                    result != null
+                        ? 'Result : ${result!.code}'
+                        : 'Scan a barcode',
+                    maxLines: 3,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )),
+          ],
+        ),
+      ));
+
+  Widget _buildQrView(BuildContext context) {
+    const percentWidth = 0.8;
+    return QRView(
+      key: qrKey,
+      onQRViewCreated: _onQRViewCreated,
+      overlay: QrScannerOverlayShape(
+        borderColor: Theme.of(context).accentColor,
+        borderRadius: 10,
+        borderLength: 20,
+        borderWidth: 10,
+        cutOutSize: MediaQuery.of(context).size.width * percentWidth,
+      ),
+    );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    setState(() {
+      this.controller = controller;
+    });
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        result = scanData;
+      });
+    });
+  }
+}
 
 const String kNavigationExamplePage = '''
 <!DOCTYPE html><html>
@@ -107,8 +207,12 @@ class _WebViewExampleState extends State<WebViewExample> {
               onPressed: () async {
                 // ignore: deprecated_member_use
                 Scaffold.of(context).showSnackBar(
-                  SnackBar(content: Text('CLICKED QRCODE BUTTON')),
+                  SnackBar(
+                      content: Text('CLICKED QRCODE BUTTON'),
+                      duration: Duration(milliseconds: 500)),
                 );
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => QRScanPage()));
                 // final String url = (await controller.data!.currentUrl())!;
                 // // ignore: deprecated_member_use
                 // Scaffold.of(context).showSnackBar(
