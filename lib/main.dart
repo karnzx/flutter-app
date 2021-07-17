@@ -66,7 +66,7 @@ class _QRScanPageState extends State<QRScanPage> {
                   }),
             ),
             Positioned(
-                bottom: 10,
+                bottom: 30,
                 child: Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(color: Colors.white24),
@@ -79,6 +79,17 @@ class _QRScanPageState extends State<QRScanPage> {
                   ),
                 )),
           ],
+        ),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(right: 10, bottom: 20),
+          child: FloatingActionButton(
+              child: Icon(
+                Icons.arrow_back_ios_rounded,
+                size: 30,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
         ),
       ));
 
@@ -105,6 +116,12 @@ class _QRScanPageState extends State<QRScanPage> {
       setState(() {
         result = scanData;
       });
+
+      if (result!.code.contains('https://')) {
+        // check Do this url is in monthong domain?
+        controller.stopCamera();
+        Navigator.pop(context, result!.code);
+      }
     });
   }
 }
@@ -207,17 +224,20 @@ class _WebViewExampleState extends State<WebViewExample> {
               padding: const EdgeInsets.only(right: 10, bottom: 20),
               child: FloatingActionButton(
                 onPressed: () async {
-                  Navigator.push(context,
+                  final result = await Navigator.push(context,
                       MaterialPageRoute(builder: (context) => QRScanPage()));
-                  // // ignore: deprecated_member_use
-                  // Scaffold.of(context).showSnackBar(
-                  //   SnackBar(
-                  //       content: Text('CLICKED QRCODE BUTTON'),
-                  //       duration: Duration(milliseconds: 500)),
-                  // );
+                  if (result != null) {
+                    // check Do this url is in monthong domain?
+                    ScaffoldMessenger.of(context)
+                      ..removeCurrentSnackBar()
+                      ..showSnackBar(SnackBar(content: Text('$result')));
+                    await controller.data!.loadUrl(result);
+                  }
+
                   // final String url = (await controller.data!.currentUrl())!;
-                  // // ignore: deprecated_member_use
-                  // Scaffold.of(context).showSnackBar(
+                  // ScaffoldMessenger.of(context)
+                  // ..removeCurrentSnackBar()
+                  // ..showSnackBar(
                   //   SnackBar(content: Text('Favorited $url')),
                   // );
                 },
@@ -292,10 +312,11 @@ class SampleMenu extends StatelessWidget {
 
   void _onClearCache(WebViewController controller, BuildContext context) async {
     await controller.clearCache();
-    // ignore: deprecated_member_use
-    Scaffold.of(context).showSnackBar(const SnackBar(
-      content: Text("Cache cleared."),
-    ));
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(const SnackBar(
+        content: Text("Cache cleared."),
+      ));
   }
 
   void _onNavigationDelegateExample(
@@ -331,10 +352,12 @@ class NavigationControls extends StatelessWidget {
                       if (await controller.canGoBack()) {
                         await controller.goBack();
                       } else {
-                        // ignore: deprecated_member_use
-                        Scaffold.of(context).showSnackBar(
-                          const SnackBar(content: Text("No back history item")),
-                        );
+                        ScaffoldMessenger.of(context)
+                          ..removeCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content: Text("No back history item")),
+                          );
                         return;
                       }
                     },
@@ -347,11 +370,12 @@ class NavigationControls extends StatelessWidget {
                       if (await controller.canGoForward()) {
                         await controller.goForward();
                       } else {
-                        // ignore: deprecated_member_use
-                        Scaffold.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("No forward history item")),
-                        );
+                        ScaffoldMessenger.of(context)
+                          ..removeCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content: Text("No forward history item")),
+                          );
                         return;
                       }
                     },
