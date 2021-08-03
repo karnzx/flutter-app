@@ -1,4 +1,4 @@
-# my_app
+# Flutter app | PageView & QRcode
 
 Flutter Project
 
