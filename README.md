@@ -1,16 +1,24 @@
 # my_app
 
-A new Flutter project.
+Flutter Project
 
-## Getting Started
+feature
+- PageView of monthong.in.th
+- QRcode scanner and redirect with PageView (if qrcode contain https path)
 
-This project is a starting point for a Flutter application.
+## Build
 
-A few resources to get you started if this is your first Flutter project:
+1. If you don't have Flutter SDK installed, please visit official [Flutter](https://flutter.dev/) site.
+2. Fetch latest source code from master branch.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+```
+git clone https://github.com/karnzx/flutter-pageview-qrcode.git
+```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. Run the app with Android Studio or Visual Studio. Or the command line.
+
+```
+flutter pub get
+flutter run
+```
+
